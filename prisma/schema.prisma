@@ -11,17 +11,39 @@ datasource db {
 }
 
 model User {
-  id                String    @id @default(uuid())
-  fname             String
-  lname             String
-  avatar_url        String?
-  registration_date DateTime  @default(now())
-  phone             String    @unique
-  birthday          DateTime?
-  password          String
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  role              Role      @default(CLIENT)
+  id        String    @id @default(uuid())
+  fname     String
+  lname     String
+  avatarUrl String?
+  phone     String    @unique
+  birthday  DateTime? @db.Date
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  role      Role      @default(CLIENT)
+  balance   Float     @default(0)
+  orders    Order[]
+}
+
+model Ticket {
+  id            String   @id @default(uuid())
+  fromLocation  String
+  toLocation    String
+  arrivalDate   DateTime
+  departureDate DateTime
+  unitPrice     Float
+  stock         Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  passengers    Order[]
+}
+
+model Order {
+  id       String @id @default(uuid())
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
+  ticketId String
 }
 
 enum Role {
@@ -29,10 +51,4 @@ enum Role {
   ADMIN
   OPERATOR
   DEACTIVATED
-}
-
-enum Status {
-  PAID
-  CANCELLED
-  RESERVED
 }
