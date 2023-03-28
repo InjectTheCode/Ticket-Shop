@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Ticket" ALTER COLUMN "arrivalDate" SET DATA TYPE DATE,
+ALTER COLUMN "departureDate" SET DATA TYPE DATE;

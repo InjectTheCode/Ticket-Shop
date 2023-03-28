@@ -10,6 +10,14 @@ const userService = {
     const findedUSer = await db.user.findUnique({
       where: { id },
     });
+    return findedUSer;
+  },
+
+  getUserByPhoneServ: async (phone) => {
+    const findedUSer = await db.user.findUnique({
+      where: { phone },
+    });
+    return findedUSer;
   },
 
   createUserServ: async (data) => {
@@ -25,6 +33,25 @@ const userService = {
       data,
     });
     return updatedUser;
+  },
+
+  deleteUserByIdServ: async (id) => {
+    const deletedUser = await db.user.delete({
+      where: { id },
+    });
+
+    return deletedUser;
+  },
+
+  increaseWalletServ: async (phone, balance) => {
+    const newWallet = await db.user.update({
+      where: { phone },
+      data: {
+        balance,
+      },
+    });
+
+    return newWallet;
   },
 };
 

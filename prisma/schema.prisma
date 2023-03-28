@@ -29,8 +29,8 @@ model Ticket {
   id            String   @id @default(uuid())
   fromLocation  String
   toLocation    String
-  arrivalDate   DateTime
-  departureDate DateTime
+  arrivalDate   DateTime @db.Date
+  departureDate DateTime @db.Date
   unitPrice     Float
   stock         Int
   createdAt     DateTime @default(now())

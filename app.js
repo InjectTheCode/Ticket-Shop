@@ -1,6 +1,8 @@
 const express = require("express");
 const errorHandler = require("./middleware/errorHandler");
+
 const userRouter = require("./routes/userRoute");
+const ticketRouter = require("./routes/ticketRoute");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -8,6 +10,7 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/ticket", ticketRouter);
 
 app.use(errorHandler);
 
