@@ -4,7 +4,6 @@ const db = require("../prisma/db");
 
 exports.tokenAuthentication = async (req, res, next) => {
   const { authorization } = req.headers;
-  console.log("headers", req.headers);
   if (!authorization) {
     return res.status(403).json({
       message: "token should be provided in headers!!",
