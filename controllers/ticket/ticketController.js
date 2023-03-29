@@ -28,7 +28,7 @@ const ticketController = {
         message: "new ticket added",
         data: newTicket,
       };
-      return res.status(204).json(result);
+      return res.status(200).json(result);
     } catch (error) {
       console.log(error);
       next(error);
@@ -38,15 +38,46 @@ const ticketController = {
   updateTicketById: async (req, res, next) => {
     try {
       const { id } = req.params;
-      const { data } = req.body;
+      const data = req.body;
       if (!id) {
         res.status(404).json({
           message: "Invalid ticket id or does not exist!",
         });
       } else {
         const updatedTicket = await ticketService.updateTicketServ(id, data);
-        res.status(204).json(updatedTicket);
+        return res.status(200).json({
+          message: `ticket ${updatedTicket.fromLocation} to ${updatedTicket.toLocation} updated successfully`,
+        });
       }
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
+
+  deleteTicket: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      await ticketService.deleteTicketServ(id);
+      res.status(200).json({
+        message: `one ticket was deleted successfully`,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
+
+  deleteManyTickets: async (req, res, next) => {
+    // in this method you should send an object with one property "ids", which should be an array!
+    try {
+      const { ids } = req.body; // this is array of ticket's ids
+      for (const id of ids) {
+        await ticketService.deleteTicketServ(id);
+      }
+      res.status(200).json({
+        message: "Your tickets were deleted successfully",
+      });
     } catch (error) {
       console.log(error);
       next(error);

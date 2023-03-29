@@ -20,6 +20,13 @@ const ticketService = {
     });
     return updatedTicket;
   },
+
+  deleteTicketServ: async (id) => {
+    const deletedTicket = await db.ticket.delete({
+      where: { id },
+    });
+    return deletedTicket;
+  },
 };
 
 module.exports = ticketService;

@@ -1,7 +1,42 @@
 const userService = require("./userService");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 const userController = {
+  login: async (req, res, next) => {
+    try {
+      const { phone, password } = req.body;
+      const user = await userService.getUserByPhoneServ(phone);
+
+      if (!user) {
+        return res.status(403).json({
+          message: "Invalid ceridential",
+        });
+      }
+
+      console.log("phone: " + phone);
+      console.log("db user phone", user.phone);
+      const validPassword = await bcrypt.compare(password, user.password);
+
+      if (!validPassword) {
+        return res.status(403).json({
+          message: "Invalid ceridential",
+        });
+      }
+
+      const token = jwt.sign({ phone: user.phone }, process.env.SECRET_KEY, {
+        expiresIn: Number(process.env.TOKEN_EXPIRE_TIME),
+      });
+
+      return res.json({
+        access_token: token,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
+
   getAllUsers: async (req, res, next) => {
     try {
       const allUser = await userService.getAllUserServ();
