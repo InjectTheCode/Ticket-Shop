@@ -6,6 +6,15 @@ const ticketService = {
     return alltickets;
   },
 
+  getTicketServ: async (id) => {
+    const oneTicket = await db.ticket.findUnique({
+      where: {
+        id,
+      },
+    });
+    return oneTicket;
+  },
+
   addNewTicketServ: async (data) => {
     const newTicket = await db.ticket.create({
       data,

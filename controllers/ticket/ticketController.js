@@ -15,10 +15,22 @@ const ticketController = {
     }
   },
 
+  getTicket: async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const getTicket = await ticketService.getTicketServ(id);
+      return res.status(200).json(getTicket);
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
+
   addNewTicket: async (req, res, next) => {
+    // data from req.body expects a JSON object.
+
     try {
       const data = req.body;
-      console.log(data);
       const newTicket = await ticketService.addNewTicketServ({
         ...req.body,
         arrivalDate: new Date(data.arrivalDate),
@@ -36,6 +48,9 @@ const ticketController = {
   },
 
   updateTicketById: async (req, res, next) => {
+    // I will send the ID of the ticket with param.
+    // and send a json request to update any thing as I want.
+
     try {
       const { id } = req.params;
       const data = req.body;
@@ -56,6 +71,8 @@ const ticketController = {
   },
 
   deleteTicket: async (req, res, next) => {
+    // I will send the ticket's ID with req.param.
+
     try {
       const { id } = req.params;
       await ticketService.deleteTicketServ(id);

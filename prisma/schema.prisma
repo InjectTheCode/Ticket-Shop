@@ -46,6 +46,7 @@ model Order {
   userId      String
   ticketId    String
   totalPrice  Float
+  status      Status        @default(RESERVED)
   transaction Transaction[]
 
   user   User   @relation(fields: [userId], references: [id])
@@ -66,4 +67,10 @@ model Transaction {
 enum Role {
   CLIENT
   ADMIN
+}
+
+enum Status {
+  PAID
+  RESERVED
+  CANCELLED
 }
