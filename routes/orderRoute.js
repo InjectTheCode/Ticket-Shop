@@ -8,6 +8,12 @@ const router = express.Router();
 
 // Get methods
 router.get("/", tokenAuthentication, checkAdmin, orderController.seeAllOrders);
+router.get(
+  "/:id",
+  tokenAuthentication,
+  checkAdmin,
+  orderController.getOrderInfo
+);
 
 // Post methods
 router.post(

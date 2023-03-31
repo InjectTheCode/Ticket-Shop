@@ -3,6 +3,27 @@ const ticketService = require("../ticket/ticketService");
 const orderService = require("./orderService");
 
 const orderController = {
+  getOrderInfo: async (req, res, next) => {
+    const { id } = req.params;
+    try {
+      const orderInfo = await orderService.getOrderInfoServ(id);
+
+      if (!orderInfo) {
+        return res.status(404).json({
+          message: "Order not found or does not exist",
+        });
+      }
+
+      return res.status(200).json({
+        message: `your order info was successfully found`,
+        data: orderInfo,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
+
   seeAllOrders: async (req, res, next) => {
     const allOrders = await orderService.seeAllOrdersServ();
 
@@ -14,8 +35,17 @@ const orderController = {
 
   deleteOrder: async (req, res, next) => {
     // I will send the order's ID with req.params.
-
     const { id } = req.params;
+
+    const orderInfo = await orderService.getOrderInfoServ(id);
+    if (orderInfo.status !== "RESERVED") {
+      return res.status(404).json({ message: "somthing went wrong" });
+    }
+    const { ticketId, ticket_count } = orderInfo;
+
+    // Get ticket information for increasing or decreasing ticket's stock quantity.
+    const ticketInfo = await ticketService.getTicketServ(ticketId);
+    const data = { stock: Number(ticket_count) + ticketInfo.stock };
 
     if (!id) {
       return res.json({
@@ -24,7 +54,7 @@ const orderController = {
     }
 
     try {
-      await orderService.deleteOrderServ(id);
+      await orderService.deleteOrderServ(id, ticketId, data);
 
       return res.status(200).json({
         message: "Order deleted successfully",

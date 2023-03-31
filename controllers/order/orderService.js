@@ -3,7 +3,7 @@ const { exclude } = require("../../utils/exclude");
 
 const orderService = {
   addNewOrderForUserServ: async (orderData) => {
-    const { userId, ticketId, totalPrice, newStock } = orderData;
+    const { userId, ticketId, totalPrice, newStock, ticket_count } = orderData;
 
     try {
       const [order, _] = await db.$transaction([
@@ -12,6 +12,7 @@ const orderService = {
             userId,
             ticketId,
             totalPrice,
+            ticket_count,
           },
         }),
         db.ticket.update({
@@ -35,7 +36,28 @@ const orderService = {
     return await db.order.findMany();
   },
 
-  deleteOrderServ: async (id) => {
+  getOrderInfoServ: async (id) => {
+    return await db.order.findUnique({
+      where: { id },
+    });
+  },
+
+  deleteOrderServ: async (id, ticketId, data) => {
+    try {
+      const [order, _] = await db.$transaction([
+        db.order.delete({
+          where: { id },
+        }),
+        db.ticket.update({
+          where: { id: ticketId },
+          data,
+        }),
+      ]);
+      return order;
+    } catch (error) {
+      console.log(error);
+      throw new Error(error.message);
+    }
     return await db.order.delete({
       where: { id },
     });
