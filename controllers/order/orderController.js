@@ -39,7 +39,10 @@ const orderController = {
 
     const orderInfo = await orderService.getOrderInfoServ(id);
     if (orderInfo.status !== "RESERVED") {
-      return res.status(404).json({ message: "somthing went wrong" });
+      return res.status(404).json({
+        message:
+          "can't delete PAID or CANCELED tickets by user! only in RESERVED status you can delete",
+      });
     }
     const { ticketId, ticket_count } = orderInfo;
 
@@ -57,7 +60,7 @@ const orderController = {
       await orderService.deleteOrderServ(id, ticketId, data);
 
       return res.status(200).json({
-        message: "Order deleted successfully",
+        message: "Order, deleted successfully",
       });
     } catch (error) {
       console.log(error);
@@ -99,6 +102,41 @@ const orderController = {
       return res.status(200).json({
         message: `New order with status RESERVED added successfully`,
         data: order,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
+
+  updateOrder: async (req, res, next) => {
+    const { id } = req.params;
+    const { ticket_count } = req.body;
+
+    if (!id) {
+      return res.json({
+        message: "Invalid order ID",
+      });
+    }
+
+    const orderInfo = await orderService.getOrderInfoServ(id);
+    const unitPrice = orderInfo.totalPrice / orderInfo.ticket_count;
+    const tempData = { ticket_count, unitPrice };
+
+    const ticketInfo = await ticketService.getTicketServ(orderInfo.ticketId);
+    console.log("ticketInfo: " + ticketInfo);
+    if (ticketInfo.stock < ticket_count) {
+      return res.status(404).json({
+        message: `there is no more stock available, only ${ticketInfo.stock} available.`,
+      });
+    }
+
+    try {
+      const updatedOrder = await orderService.updateOrderServ(id, tempData);
+
+      return res.status(200).json({
+        message: "your order was updated successfully",
+        data: updatedOrder,
       });
     } catch (error) {
       console.log(error);

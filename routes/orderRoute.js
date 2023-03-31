@@ -15,6 +15,9 @@ router.get(
   orderController.getOrderInfo
 );
 
+// Patch methods
+router.patch("/:id", orderController.updateOrder);
+
 // Post methods
 router.post(
   "/",

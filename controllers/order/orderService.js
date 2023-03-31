@@ -58,8 +58,15 @@ const orderService = {
       console.log(error);
       throw new Error(error.message);
     }
-    return await db.order.delete({
+  },
+
+  updateOrderServ: async (id, tempData) => {
+    return await db.order.update({
       where: { id },
+      data: {
+        ticket_count: tempData.ticket_count,
+        totalPrice: tempData.ticket_count * tempData.unitPrice,
+      },
     });
   },
 };
