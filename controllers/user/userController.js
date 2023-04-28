@@ -1,22 +1,22 @@
 const userService = require("./userService");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const dao = require("../../utils/DAO");
+const daoArray = require("../../utils/DAO");
 
 const userController = {
   login: async (req, res, next) => {
     try {
       const { phone, password } = req.body;
-      const user = await userService.getUserByPhoneServ(phone);
+      const userInfo = await userService.getUserByPhoneServ(phone);
 
-      if (!user) {
+      if (!userInfo) {
         return res.status(403).json({
           message: "Invalid ceridential",
         });
       }
 
-      console.log("phone: " + phone);
-      console.log("db user phone", user.phone);
-      const validPassword = await bcrypt.compare(password, user.password);
+      const validPassword = await bcrypt.compare(password, userInfo.password);
 
       if (!validPassword) {
         return res.status(403).json({
@@ -24,9 +24,62 @@ const userController = {
         });
       }
 
-      const token = jwt.sign({ phone: user.phone }, process.env.SECRET_KEY, {
-        expiresIn: Number(process.env.TOKEN_EXPIRE_TIME),
+      const token = jwt.sign(
+        { phone: userInfo.phone },
+        process.env.SECRET_KEY,
+        {
+          expiresIn: Number(process.env.TOKEN_EXPIRE_TIME),
+        }
+      );
+
+      const refreshTokenJWT = jwt.sign(
+        { phone: userInfo.phone },
+        process.env.SECRET_REFRESH_KEY,
+        {
+          expiresIn: Number(process.env.TOKEN_REFRESH_TIME),
+        }
+      );
+
+      let expiredAt = new Date();
+      expiredAt.setSeconds(
+        expiredAt.getSeconds() + process.env.TOKEN_REFRESH_TIME
+      );
+
+      await userService.setRefreshTokenServ({
+        token: refreshTokenJWT,
+        userRefreshToken: userInfo.id,
+        expiryDate: expiredAt,
       });
+
+      return res.json({
+        access_token: token,
+        refreshToken: refreshTokenJWT,
+      });
+    } catch (error) {
+      console.log(error);
+      next(error);
+    }
+  },
+
+  generateNewAccessToken: async (req, res, next) => {
+    try {
+      const { phone } = req.body;
+      console.log("================================================");
+      console.log(phone);
+      const userInfo = await userService.getUserByPhoneServ(phone);
+      if (!userInfo) {
+        return res.status(403).json({
+          message: "Invalid ceridential",
+        });
+      }
+
+      const token = jwt.sign(
+        { phone: userInfo.phone },
+        process.env.SECRET_KEY,
+        {
+          expiresIn: Number(process.env.TOKEN_EXPIRE_TIME),
+        }
+      );
 
       return res.json({
         access_token: token,
@@ -45,7 +98,9 @@ const userController = {
           message: "there is no user exist in the database",
         });
       } else {
-        res.status(200).json(allUser);
+        res.status(200).json({
+          data: daoArray(allUser, "password"),
+        });
       }
     } catch (error) {
       console.log(error);
@@ -88,13 +143,13 @@ const userController = {
   registerUser: async (req, res, next) => {
     try {
       const { password, fname } = req.body;
-      console.log(password, fname);
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password, salt);
       const newUser = await userService.createUserServ({
         ...req.body,
         password: hashedPassword,
       });
+      dao(newUser, "password");
       const result = {
         message: `The ${fname} user has been registered`,
         data: newUser,

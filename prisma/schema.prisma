@@ -11,17 +11,18 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  fname     String
-  lname     String
-  avatarUrl String?
-  phone     String    @unique
-  birthday  DateTime? @db.Date
-  password  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  role      Role      @default(CLIENT)
-  balance   Float     @default(0)
+  id           String        @id @default(uuid())
+  fname        String
+  lname        String
+  avatarUrl    String?
+  phone        String        @unique
+  birthday     DateTime?     @db.Date
+  password     String
+  refreshToken RefreshToken?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  role         Role          @default(CLIENT)
+  balance      Float         @default(0)
 
   orders       Order[]
   transactions Transaction[]
@@ -63,6 +64,14 @@ model Transaction {
 
   Order Order @relation(fields: [orderId], references: [id])
   user  User  @relation(fields: [userId], references: [id])
+}
+
+model RefreshToken {
+  id               String   @id @default(uuid())
+  token            String
+  user             User     @relation(fields: [userRefreshToken], references: [id])
+  userRefreshToken String   @unique
+  expiryDate       DateTime
 }
 
 enum Role {

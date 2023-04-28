@@ -53,6 +53,34 @@ const userService = {
 
     return newWallet;
   },
+
+  // createTokenServ: async (data) => {
+  //   const { expiryDate } = data;
+  //   console.log(data.user.id);
+  //   console.log("================================================");
+  //   return await db.refreshToken.create({
+  //     data: {
+  //       expiryDate: expiryDate,
+  //       userRefreshToken: data.user.id,
+  //     },
+  //   });
+  // },
+
+  // getRefreshTokenServ: async (id) => {
+  //   return await db.refreshToken.findUnique({
+  //     where: { userRefreshToken: id },
+  //   });
+  // },
+
+  setRefreshTokenServ: async (data) => {
+    await db.refreshToken.create({
+      data: {
+        token: data.token,
+        userRefreshToken: data.userRefreshToken,
+        expiryDate: data.expiryDate,
+      },
+    });
+  },
 };
 
 module.exports = userService;
